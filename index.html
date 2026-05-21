@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineStream App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #141414;
+            --card-bg: #181818;
+            --accent-color: #E50914;
+            --text-color: #FFFFFF;
+            --text-muted: #AAAAAA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        /* --- PANTALLA 1: SELECCIÓN INICIAL --- */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1f2538 0%, #0b0c10 100%);
+            z-index: 200;
+        }
+
+        .welcome-screen h1 {
+            font-size: 3rem;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .menu-grid {
+            display: flex;
+            gap: 40px;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .menu-btn {
+            flex: 1;
+            background-color: rgba(24, 24, 24, 0.85);
+            border: 3px solid #333;
+            border-radius: 16px;
+            padding: 60px 30px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.05);
+            border-color: var(--accent-color);
+            background-color: #1c1f2e;
+            box-shadow: 0 15px 30px rgba(229, 9, 20, 0.25);
+        }
+
+        .menu-btn .icon {
+            font-size: 4.5rem;
+        }
+
+        /* --- PANTALLA 2: INTERFAZ EN CUADRÍCULA COMPLETA --- */
+        .app-screen {
+            display: none; /* Oculta al inicio */
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 100px; /* Espacio para que la navbar fija no tape el contenido */
+        }
+
+        /* Navbar */
+        nav {
+            position: fixed;
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            z-index: 100;
+            background-color: rgba(20, 20, 20, 0.98);
+            padding: 15px 4%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #222;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            color: var(--accent-color);
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .btn-back-menu {
+            background: #252525;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        .btn-back-menu:hover { background: #353535; }
+
+        /* Buscador integrado */
+        .search-box {
+            padding: 12px 20px;
+            background: #252525;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 25px;
+            width: 320px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .search-box:focus { 
+            outline: none;
+            border-color: var(--accent-color);
+            background: #333;
+            width: 380px;
+        }
+
+        /* Sección de Catálogo */
+        .catalog-section {
+            padding: 20px 4% 50px 4%;
+            flex-grow: 1;
+        }
+
+        .row-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #fff;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 12px;
+        }
+
+        /* Cuadrícula Responsiva Mejorada (Grid) */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px; /* Margen y separación saludable entre tarjetas */
+            padding-bottom: 40px;
+        }
+
+        /* Tarjetas Estilo Netflix */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            aspect-ratio: 2 / 3; /* Mantiene la proporción perfecta del póster */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
+        }
+
+        .card:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 12px 24px rgba(0,0,0,0.8);
+            z-index: 5; 
+        }
+
+        .card img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+
+        .card-info {
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,1) 70%, rgba(0,0,0,0));
+            padding: 20px 15px 15px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .card:hover .card-info { 
+            opacity: 1; 
+        }
+
+        .card-name { 
+            font-weight: bold; 
+            font-size: 15px; 
+            text-overflow: ellipsis; 
+            overflow: hidden; 
+            white-space: nowrap;
+            margin-bottom: 5px;
+        }
+
+        .card-meta {
+            font-size: 13px;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Modal del Reproductor */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            width: 100%; max-width: 1000px;
+            border-radius: 12px; 
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .close-modal {
+            position: absolute; top: 15px; right: 22px;
+            font-size: 38px; color: #fff; cursor: pointer; z-index: 1010;
+            transition: color 0.2s;
+        }
+        .close-modal:hover { color: var(--accent-color); }
+
+        video { width: 100%; aspect-ratio: 16/9; background-color: #000; display: block; }
+        
+        .modal-body { padding: 30px; }
+        .modal-title { font-size: 26px; font-weight: bold; margin-bottom: 15px; }
+        
+        /* Lista de capítulos */
+        .episode-zone { margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; }
+        .episode-list { margin-top: 15px; max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .episode-item { background-color: #242424; padding: 14px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .episode-item:hover, .episode-item.active { background-color: var(--accent-color); color: #fff; }
+        
+        /* Ajuste para scrollbars del navegador en modo oscuro */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA 1: MENÚ DE BIENVENIDA -->
+    <div class="welcome-screen" id="screen-menu">
+        <h1>¿Qué deseas ver hoy?</h1>
+        <div class="menu-grid">
+            <div class="menu-btn" onclick="entrarApp('peliculas')">
+                <span class="icon">🎬</span>
+                <span>Películas</span>
+            </div>
+            <div class="menu-btn" onclick="entrarApp('series')">
+                <span class="icon">🍿</span>
+                <span>Series</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 2: INTERFAZ APP ESTILO NETFLIX (GRID COMPLETO) -->
+    <div class="app-screen" id="screen-app">
+        <nav>
+            <div class="logo-area">
+                <button class="btn-back-menu" onclick="irAlMenuPrincipal()">🏠 Inicio</button>
+                <div class="logo" id="app-logo-text">CineStream</div>
+            </div>
+            <input type="text" id="app-search" class="search-box" placeholder="🔍 Buscar por título...">
+        </nav>
+
+        <!-- Sección de Catálogo Principal -->
+        <div class="catalog-section">
+            <div class="row-title" id="row-dynamic-title">Catálogo</div>
+            <!-- Aquí se despliegan todas las tarjetas usando la nueva cuadrícula limpia -->
+            <div class="cards-grid" id="cards-target-container"></div>
+        </div>
+    </div>
+
+    <!-- Modal del Reproductor Integrado -->
+    <div class="modal" id="playerModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModalBtn">&times;</span>
+            <video id="mainVideoPlayer" controls autoplay></video>
+            <div class="modal-body">
+                <div class="modal-title" id="modalMediaTitle">Título</div>
+                <div class="episode-zone" id="seriesEpisodeZone" style="display: none;">
+                    <h4 style="color: var(--text-muted); margin-bottom:10px;">Episodios disponibles:</h4>
+                    <div class="episode-list" id="episodeListContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tipoActual = 'peliculas'; 
+        let cacheContenido = [];
+        const fallbackPoster = "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=500&auto=format&fit=crop";
+
+        const screenMenu = document.getElementById('screen-menu');
+        const screenApp = document.getElementById('screen-app');
+        const cardsTargetContainer = document.getElementById('cards-target-container');
+        const rowDynamicTitle = document.getElementById('row-dynamic-title');
+        const appLogoText = document.getElementById('app-logo-text');
+        const appSearch = document.getElementById('app-search');
+
+        const playerModal = document.getElementById('playerModal');
+        const mainVideoPlayer = document.getElementById('mainVideoPlayer');
+        const modalMediaTitle = document.getElementById('modalMediaTitle');
+        const seriesEpisodeZone = document.getElementById('seriesEpisodeZone');
+        const episodeListContainer = document.getElementById('episodeListContainer');
+
+        function irAlMenuPrincipal() {
+            mainVideoPlayer.pause();
+            mainVideoPlayer.src = "";
+            playerModal.style.display = 'none';
+            screenApp.style.display = 'none';
+            screenMenu.style.display = 'flex';
+        }
+
+        async function entrarApp(tipo) {
+            tipoActual = tipo;
+            appSearch.value = "";
+            screenMenu.style.display = 'none';
+            screenApp.style.display = 'flex';
+            
+            cardsTargetContainer.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px;">Cargando biblioteca...</p>`;
+
+            if (tipo === 'peliculas') {
+                appLogoText.innerText = "CineStream • Películas";
+                rowDynamicTitle.innerText = "Películas Disponibles";
+                const res = await fetch('/api/peliculas');
+                cacheContenido = await res.json();
+                renderizarPeliculas(cacheContenido);
+            } else {
+                appLogoText.innerText = "CineStream • Series";
+                rowDynamicTitle.innerText = "Series Disponibles";
+                const res = await fetch('/api/series');
+                cacheContenido = await res.json();
+                renderizarSeries(cacheContenido);
+            }
+        }
+
+        function renderizarPeliculas(lista) {
+            cardsTargetContainer.innerHTML = "";
+            if(lista.length === 0) {
+                cardsTargetContainer.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px;">No se encontraron películas con ese nombre.</p>`;
+                return;
+            }
+            lista.forEach(pelicula => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${pelicula.logo || fallbackPoster}" onerror="this.src='${fallbackPoster}'">
+                    <div class="card-info">
+                        <div class="card-name">${pelicula.nombre}</div>
+                        <div class="card-meta">Ver Película</div>
+                    </div>
+                `;
+                card.onclick = () => {
+                    seriesEpisodeZone.style.display = 'none';
+                    modalMediaTitle.innerText = pelicula.nombre;
+                    mainVideoPlayer.src = `/stream?url=${encodeURIComponent(pelicula.url)}`;
+                    playerModal.style.display = 'flex';
+                };
+                cardsTargetContainer.appendChild(card);
+            });
+        }
+
+        function renderizarSeries(lista) {
+            cardsTargetContainer.innerHTML = "";
+            if(lista.length === 0) {
+                cardsTargetContainer.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px;">No se encontraron series con ese nombre.</p>`;
+                return;
+            }
+            lista.forEach(serie => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${serie.logo || fallbackPoster}" onerror="this.src='${fallbackPoster}'">
+                    <div class="card-info">
+                        <div class="card-name">${serie.title}</div>
+                        <div class="card-meta">${serie.capitulos.length} Episodios</div>
+                    </div>
+                `;
+                card.onclick = () => desplegarFichaSerie(serie);
+                cardsTargetContainer.appendChild(card);
+            });
+        }
+
+        function desplegarFichaSerie(serie) {
+            modalMediaTitle.innerText = serie.title;
+            episodeListContainer.innerHTML = '';
+            seriesEpisodeZone.style.display = 'block';
+
+            serie.capitulos.forEach((cap, index) => {
+                const item = document.createElement('div');
+                item.className = `episode-item ${index === 0 ? 'active' : ''}`;
+                item.innerText = cap.titulo_capitulo;
+                
+                item.onclick = () => {
+                    document.querySelectorAll('.episode-item').forEach(el => el.classList.remove('active'));
+                    item.classList.add('active');
+                    mainVideoPlayer.src = `/stream?url=${encodeURIComponent(cap.url)}`;
+                };
+                episodeListContainer.appendChild(item);
+            });
+
+            if(serie.capitulos.length > 0) {
+                mainVideoPlayer.src = `/stream?url=${encodeURIComponent(serie.capitulos[0].url)}`;
+            }
+            playerModal.style.display = 'flex';
+        }
+
+        // Buscador Inteligente Reactivo en Tiempo Real
+        appSearch.oninput = () => {
+            const query = appSearch.value.toLowerCase().trim();
+            if (tipoActual === 'peliculas') {
+                const filtrados = cacheContenido.filter(p => p.nombre.toLowerCase().includes(query));
+                renderizarPeliculas(filtrados);
+            } else {
+                const filtrados = cacheContenido.filter(s => s.title.toLowerCase().includes(query));
+                renderizarSeries(filtrados);
+            }
+        };
+
+        // Cerrar Modales
+        document.getElementById('closeModalBtn').onclick = () => {
+            playerModal.style.display = 'none';
+            mainVideoPlayer.pause();
+            mainVideoPlayer.src = "";
+        };
+    </script>
+</body>
+</html>
